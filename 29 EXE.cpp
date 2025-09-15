@@ -1,0 +1,80 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// global variables (semaphores and buffer counters)
+int mutex = 1;
+int full = 0;
+int empty = 10;
+int x = 0;   // item counter
+
+// wait (P) operation
+void wait(int *s) {
+    --(*s);
+}
+
+// signal (V) operation
+void signal(int *s) {
+    ++(*s);
+}
+
+void producer() {
+    wait(&mutex);
+    wait(&empty);
+    signal(&full);
+
+    x++;
+    printf("\nProducer produces item %d", x);
+
+    signal(&mutex);
+}
+
+void consumer() {
+    wait(&mutex);
+    wait(&full);
+    signal(&empty);
+
+    printf("\nConsumer consumes item %d", x);
+    x--;
+
+    signal(&mutex);
+}
+
+int main() {
+    int n;
+    printf("\n1. Press 1 for Producer"
+           "\n2. Press 2 for Consumer"
+           "\n3. Press 3 for Exit");
+
+    while (1) {
+        printf("\nEnter your choice: ");
+        scanf("%d", &n);
+
+        switch (n) {
+            case 1:
+                if ((mutex == 1) && (empty != 0)) {
+                    producer();
+                } else {
+                    printf("\nBuffer is full!");
+                }
+                break;
+
+            case 2:
+                if ((mutex == 1) && (full != 0)) {
+                    consumer();
+                } else {
+                    printf("\nBuffer is empty!");
+                }
+                break;
+
+            case 3:
+                exit(0);
+                break;
+
+            default:
+                printf("\nInvalid choice!");
+        }
+    }
+
+    return 0;
+}
+
